@@ -1,4 +1,5 @@
 # Stoic-PhoneExchange
+![STOIC](https://github.com/TheStoicBear/Stoic-PhoneExchange/assets/112611821/b5e01f81-c582-45cd-a467-04638a41608f)
 
 ## Features
 
