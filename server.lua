@@ -1,15 +1,3 @@
-RegisterServerEvent('checkPlayerDuty')
-AddEventHandler('checkPlayerDuty', function()
-    local player = source
-    local playerData = NDCore.getPlayer(player)
-
-    if playerData and playerData.job == 'sasp' then
-        TriggerClientEvent('playerOnDuty', player, true)
-    else
-        TriggerClientEvent('playerOnDuty', player, false)
-    end
-end)
-
 local function getPlayerIdentifier(source)
     for _, identifier in ipairs(GetPlayerIdentifiers(source)) do
         if string.match(identifier, "license:") then
