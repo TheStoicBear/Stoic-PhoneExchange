@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap');
+        body {
+            background: rgba(0, 0, 0, 0.0);
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            display: none; /* Initially hide the body */
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+        .notification {
+            background-color: #1a202c; /* Default background color */
+            font-size: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 5px solid #4299e1; /* Default border color */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.5s, transform 0.5s;
+            position: absolute;
+            top: 20px; /* Default position from top */
+            right: 20px; /* Default position from right */
+        }
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Size classes based on configurable size */
+        .size-1 {
+            font-size: 10px;
+            padding: 10px;
+        }
+        .size-2 {
+            font-size: 12px;
+            padding: 12px;
+        }
+        .size-3 {
+            font-size: 14px;
+            padding: 14px;
+        }
+        .size-4 {
+            font-size: 16px;
+            padding: 16px;
+        }
+        .size-5 {
+            font-size: 18px;
+            padding: 18px;
+        }
+        .size-6 {
+            font-size: 20px;
+            padding: 20px;
+        }
+        .size-7 {
+            font-size: 22px;
+            padding: 22px;
+        }
+        .size-8 {
+            font-size: 24px;
+            padding: 24px;
+        }
+        .size-9 {
+            font-size: 26px;
+            padding: 26px;
+        }
+        .size-10 {
+            font-size: 28px;
+            padding: 28px;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center">
+    <div id="notification" class="notification flex items-center space-x-4">
+        <div>
+            <svg id="icon" class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m0 0h-1m1 0v-1a1 1 0 112 0v1m-1 4h.01m6.938 4H4.062A2.062 2.062 0 012 17.938V6.062A2.062 2.062 0 014.062 4h15.876A2.062 2.062 0 0122 6.062v11.876A2.062 2.062 0 0119.938 20z"></path></svg>
+        </div>
+        <div>
+            <h1 id="header" class="text-2xl font-bold"></h1>
+            <p id="message" class="mt-2"></p>
+        </div>
+    </div>
+
+    <script>
+        function display(bool) {
+            if (bool) {
+                $("body").fadeIn("slow");
+                setTimeout(function() {
+                    $("#notification").addClass("show");
+                }, 100); // Slight delay for fade-in effect
+            } else {
+                $("#notification").removeClass("show");
+                setTimeout(function() {
+                    $("body").fadeOut("slow");
+                }, 3500); // Wait for the notification to hide first
+            }
+        }
+
+        window.addEventListener('message', function(event) {
+            var item = event.data;
+            if (item.type === "notification") {
+                $('#header').text(item.header);
+                $('#message').text(item.message);
+                var sizeClass = 'size-' + item.size;
+                $('#notification').removeClass().addClass('notification').addClass(sizeClass);
+                $('#icon').attr('class', 'w-12 h-12 ' + item.iconColor); // Set icon color dynamically
+                $('#notification').css('background-color', item.backgroundColor); // Set background color dynamically
+                $('#notification').css('border-left-color', item.borderColor); // Set border color dynamically
+                display(true);
+                setTimeout(function() {
+                    display(false);
+                }, 6500); // Hide after 5 seconds
+            }
+        });
+    </script>
+</body>
+</html>
