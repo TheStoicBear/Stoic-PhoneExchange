@@ -8,67 +8,65 @@ local function getPlayerIdentifier(source)
 end
 
 local function getPhoneNumber(identifier, callback)
-    print("getPhoneNumber called with identifier: " .. identifier) -- Debug print
     MySQL.Async.fetchScalar('SELECT phonenumber FROM nd_characters WHERE identifier = @identifier', {
         ['@identifier'] = identifier
     }, function(phoneNumber)
-        if phoneNumber then
-            print("Phone number found: " .. phoneNumber) -- Debug print
-        else
-            print("No phone number found for identifier: " .. identifier) -- Debug print
-        end
         callback(phoneNumber)
     end)
 end
 
-RegisterCommand('givenum', function(source, args)
-    local targetId = tonumber(args[1])
-    if targetId then
-        local identifier = getPlayerIdentifier(source)
+-- When a player shares their phone number with another player
+RegisterServerEvent('givePhoneNumberToPlayer')
+AddEventHandler('givePhoneNumberToPlayer', function(targetId)
+    local sourceId = source
+    local identifier = getPlayerIdentifier(sourceId)
+
+    if targetId and identifier then
         getPhoneNumber(identifier, function(phoneNumber)
             if phoneNumber then
-                -- Send notification to source player
-                TriggerClientEvent('showNotification', source, 'SYSTEM', 'You shared your phone number with player ' .. GetPlayerName(targetId) .. '.')
-                
-                -- Send notification to target player
-                TriggerClientEvent('showNotification', targetId, 'SYSTEM', 'Player ' .. GetPlayerName(source) .. ' has shared their phone number with you: ' .. phoneNumber)
+                -- Notify both players
+                TriggerClientEvent('showNotification', sourceId, 'SYSTEM', 'You shared your phone number with player ' .. GetPlayerName(targetId) .. '.')
+                TriggerClientEvent('showNotification', targetId, 'SYSTEM', 'Player ' .. GetPlayerName(sourceId) .. ' has shared their phone number with you: ' .. phoneNumber)
             else
-                TriggerClientEvent('showNotification', source, 'SYSTEM', 'Failed to retrieve your phone number.')
+                TriggerClientEvent('showNotification', sourceId, 'SYSTEM', 'Failed to retrieve your phone number.')
             end
         end)
     else
-        TriggerClientEvent('showNotification', source, 'SYSTEM', 'Invalid target ID.')
+        TriggerClientEvent('showNotification', sourceId, 'SYSTEM', 'Invalid target ID or player identifier.')
     end
-end, false)
-
-
-RegisterCommand('reqnum', function(source, args)
-    print("/reqnum command called by player: " .. GetPlayerName(source)) -- Debug print
-    local targetId = tonumber(args[1])
-    if targetId then
-        print("Requesting phone number from target ID: " .. targetId) -- Debug print
-        TriggerClientEvent('showPhoneRequestDialog', targetId, source)
-        TriggerClientEvent('showNotification', source, 'SYSTEM', 'Request sent to Player ' .. GetPlayerName(targetId) .. '.')
-        print("Phone number request sent to target ID: " .. targetId) -- Debug print
-    else
-        print("Invalid target ID: " .. tostring(args[1])) -- Debug print
-        TriggerClientEvent('showNotification', source, 'SYSTEM', 'Invalid target ID.')
-    end
-end, false)
-
-RegisterServerEvent('givePhoneNumber')
-AddEventHandler('givePhoneNumber', function(requesterId, targetId)
-    local targetIdentifier = getPlayerIdentifier(targetId)
-    print("Target Identifier: " .. targetIdentifier) -- Debug print
-    getPhoneNumber(targetIdentifier, function(phoneNumber)
-        if phoneNumber then
-            print("Sharing phone number: " .. phoneNumber .. " with requester ID: " .. requesterId) -- Debug print
-            TriggerClientEvent('showNotification', requesterId, 'SYSTEM', 'Player ' .. GetPlayerName(targetId) .. ' has approved your request. Their phone number is: ' .. phoneNumber)
-            TriggerClientEvent('showNotification', targetId, 'SYSTEM', 'You shared your phone number with Player ' .. GetPlayerName(requesterId) .. '.')
-        else
-            print("Failed to retrieve phone number for player ID: " .. targetId) -- Debug print
-            TriggerClientEvent('showNotification', targetId, 'SYSTEM', 'Failed to retrieve your phone number.')
-        end
-    end)
 end)
 
+-- When a player requests another player's phone number
+RegisterServerEvent('requestPhoneNumberFromPlayer')
+AddEventHandler('requestPhoneNumberFromPlayer', function(targetId)
+    local sourceId = source
+
+    if targetId then
+        -- Send a request dialog to the target player
+        TriggerClientEvent('showPhoneRequestDialog', targetId, sourceId)
+        TriggerClientEvent('showNotification', sourceId, 'SYSTEM', 'Phone number request sent to Player ' .. GetPlayerName(targetId) .. '.')
+    else
+        TriggerClientEvent('showNotification', sourceId, 'SYSTEM', 'Invalid target ID.')
+    end
+end)
+
+-- When a player approves a phone number request
+RegisterServerEvent('approvePhoneNumberRequest')
+AddEventHandler('approvePhoneNumberRequest', function(requesterId)
+    local sourceId = source
+    local identifier = getPlayerIdentifier(sourceId)
+
+    if requesterId and identifier then
+        getPhoneNumber(identifier, function(phoneNumber)
+            if phoneNumber then
+                -- Notify both players
+                TriggerClientEvent('showNotification', requesterId, 'SYSTEM', 'Player ' .. GetPlayerName(sourceId) .. ' has approved your request. Their phone number is: ' .. phoneNumber)
+                TriggerClientEvent('showNotification', sourceId, 'SYSTEM', 'You shared your phone number with Player ' .. GetPlayerName(requesterId) .. '.')
+            else
+                TriggerClientEvent('showNotification', sourceId, 'SYSTEM', 'Failed to retrieve your phone number.')
+            end
+        end)
+    else
+        TriggerClientEvent('showNotification', sourceId, 'SYSTEM', 'Invalid requester ID or player identifier.')
+    end
+end)
