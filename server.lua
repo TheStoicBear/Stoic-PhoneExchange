@@ -24,9 +24,9 @@ AddEventHandler('givePhoneNumberToPlayer', function(targetId)
     if targetId and identifier then
         getPhoneNumber(identifier, function(phoneNumber)
             if phoneNumber then
-                -- Notify both players
-                TriggerClientEvent('showNotification', sourceId, 'SYSTEM', 'You shared your phone number with player ' .. GetPlayerName(targetId) .. '.')
-                TriggerClientEvent('showNotification', targetId, 'SYSTEM', 'Player ' .. GetPlayerName(sourceId) .. ' has shared their phone number with you: ' .. phoneNumber)
+               -- Notify both players with a longer display duration (e.g., 10 seconds)
+               TriggerClientEvent('showNotification', requesterId, 'SYSTEM', 'Player ' .. GetPlayerName(sourceId) .. ' has approved your request. Their phone number is: ' .. phoneNumber, 10000)
+               TriggerClientEvent('showNotification', sourceId, 'SYSTEM', 'You shared your phone number with Player ' .. GetPlayerName(requesterId) .. '.', 10000)
             else
                 TriggerClientEvent('showNotification', sourceId, 'SYSTEM', 'Failed to retrieve your phone number.')
             end
