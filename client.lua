@@ -1,4 +1,3 @@
-
 RegisterNetEvent('showNotification')
 AddEventHandler('showNotification', function(header, message)
     SendNUIMessage({
@@ -25,28 +24,28 @@ end
 
 -- Function to add the 'Give Phone Number' option to a specific player
 local function addGivePhoneNumberOption(targetPlayerId)
-    print("Adding option for player ID: " .. targetPlayerId)
+    print("Adding 'Give Phone Number' option for player ID: " .. targetPlayerId)
     exports.ox_target:addGlobalPlayer({
         label = "Give Phone Number",
         icon = "fa-phone",
         distance = 5.0,  -- Adjust as necessary
         onSelect = function()
-            -- Execute the /givenum command for the target player
-            ExecuteCommand("givenum " .. targetPlayerId)
+            -- Send the selected target's server ID to the server for processing
+            TriggerServerEvent('givePhoneNumberToPlayer', targetPlayerId)
         end
     })
 end
 
 -- Function to add the 'Request Phone Number' option to a specific player
 local function addReqPhoneNumberOption(targetPlayerId)
-    print("Adding option for player ID: " .. targetPlayerId)
+    print("Adding 'Request Phone Number' option for player ID: " .. targetPlayerId)
     exports.ox_target:addGlobalPlayer({
         label = "Request Phone Number",
         icon = "fa-phone",
         distance = 5.0,  -- Adjust as necessary
         onSelect = function()
-            -- Execute the /reqnum command for the target player
-            ExecuteCommand("reqnum " .. targetPlayerId)
+            -- Send the selected target's server ID to the server for processing
+            TriggerServerEvent('requestPhoneNumberFromPlayer', targetPlayerId)
         end
     })
 end
@@ -66,9 +65,11 @@ AddEventHandler('showPhoneRequestDialog', function(requesterId)
     })
     
     if alert == 'confirm' then
-        TriggerServerEvent('givePhoneNumber', requesterId, GetPlayerServerId(PlayerId()))
+        -- Confirm the phone number request to the server
+        TriggerServerEvent('approvePhoneNumberRequest', requesterId)
         TriggerEvent('showNotification', 'SYSTEM', 'You approved the phone number request.')
     else
+        -- Deny the phone number request
         TriggerEvent('showNotification', 'SYSTEM', 'You denied the phone number request.')
     end
 end)
@@ -78,13 +79,11 @@ AddEventHandler("onClientResourceStart", function(resource)
     if resource == GetCurrentResourceName() then
         -- Example: Add 'Give Phone Number' option to all players (replace with your logic)
         local players = GetActivePlayers()
-        print("Active players: " .. json.encode(players))
         for _, player in ipairs(players) do
             if player ~= PlayerId() then
                 local serverId = GetPlayerServerId(player)
                 addGivePhoneNumberOption(serverId)
                 addReqPhoneNumberOption(serverId)
-                print("Added option for player with Server ID: " .. serverId)
             end
         end
     end
