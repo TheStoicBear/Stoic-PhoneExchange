@@ -1,12 +1,16 @@
+-- Updated showNotification function to accept duration
 RegisterNetEvent('showNotification')
-AddEventHandler('showNotification', function(header, message)
+AddEventHandler('showNotification', function(header, message, duration)
+    duration = duration or 5000 -- Default duration is 5000ms (5 seconds)
     SendNUIMessage({
         type = 'notification',
         header = header,
         message = message,
-        position = Config.position -- Send position to NUI
+        position = Config.position,
+        duration = duration -- Send duration to NUI
     })
 end)
+
 
 RegisterNetEvent('copyPhoneNumberToClipboard')
 AddEventHandler('copyPhoneNumberToClipboard', function(phoneNumber)
