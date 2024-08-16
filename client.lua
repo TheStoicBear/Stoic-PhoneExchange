@@ -9,6 +9,15 @@ AddEventHandler('showNotification', function(header, message)
     })
 end)
 
+RegisterNetEvent('copyPhoneNumberToClipboard')
+AddEventHandler('copyPhoneNumberToClipboard', function(phoneNumber)
+    SendNUIMessage({
+        type = 'copyClipboard',
+        phoneNumber = phoneNumber
+    })
+    TriggerEvent('showNotification', 'SYSTEM', 'Phone number copied to clipboard.')
+end)
+
 -- Function to set notification position
 function setNotificationPosition(position)
     Config.position = position
